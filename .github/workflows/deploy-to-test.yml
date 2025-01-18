@@ -3,7 +3,7 @@ name: push-to-ec2
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -23,7 +23,7 @@ jobs:
           TARGET: ${{ secrets.TARGET }}
 
       - name: Move files to web directory and reload nginx
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@main
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
