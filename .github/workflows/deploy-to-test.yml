@@ -18,14 +18,14 @@ jobs:
         uses: easingthemes/ssh-deploy@v2.1.5
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST_TEST }} # Используем адрес тестового сервера
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST_TEST }} 
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.TARGET }}
 
       - name: Move files to web directory and reload nginx
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.REMOTE_HOST_TEST }} # Используем адрес тестового сервера
+          host: ${{ secrets.REMOTE_HOST_TEST }} 
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
