@@ -1,31 +1,31 @@
-name: push-to-ec2
+name: push-to-ec2-test
 
 on:
   push:
     branches:
-      - main
+      - test
 
 jobs:
   deploy:
-    name: Deploy from main branch to EC2
+    name: Deploy from test branch to Test EC2
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Upload files to EC2
+      - name: Upload files to Test EC2
         uses: easingthemes/ssh-deploy@v2.1.5
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST_TEST }} # Используем адрес тестового сервера
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.TARGET }}
 
       - name: Move files to web directory and reload nginx
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.REMOTE_HOST }}
+          host: ${{ secrets.REMOTE_HOST_TEST }} # Используем адрес тестового сервера
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
