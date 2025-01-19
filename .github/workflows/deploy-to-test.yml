@@ -1,33 +1,45 @@
-name: push-to-ec2-test
+name: deploy-docker-db
 
 on:
   push:
     branches:
-      - test
+      - docker
 
 jobs:
   deploy:
-    name: Deploy from test branch to Test EC2
+    name: Deploy MySQL container to EC2
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Upload files to Test EC2
-        uses: easingthemes/ssh-deploy@v2.1.5
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST_TEST }} 
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: ${{ secrets.TARGET }}
-
-      - name: Move files to web directory and reload nginx
+      - name: Deploy Docker container
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.REMOTE_HOST_TEST }} 
+          host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo mv /home/ubuntu/cometa.page/* /var/www/html/
-            sudo systemctl reload nginx
+            if ! command -v docker &> /dev/null
+            then
+                echo "Docker not found, installing..."
+                sudo apt update
+                sudo apt install -y docker.io
+            fi
+
+            if [ "$(docker ps -aq -f name=mysql-container)" ]; then
+                echo "Removing existing MySQL container..."
+                docker stop mysql-container
+                docker rm mysql-container
+            fi
+
+            echo "Starting MySQL container..."
+            docker run -d \
+                --name mysql-container \
+                -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} \
+                -e MYSQL_DATABASE=mydb \
+                -e MYSQL_USER=myuser \
+                -e MYSQL_PASSWORD=mypassword \
+                -p 3306:3306 \
+                mysql:8.0
